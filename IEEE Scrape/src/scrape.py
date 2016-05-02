@@ -10,4 +10,7 @@ soup = BeautifulSoup(page, 'html.parser')
 volumes = soup.find("div",{"class":'volumes'})
 years = volumes.find_all('ul')
 for year in years:
+	issues = year.find_all('a')
 	print(year['id'])
+	for issue in issues:
+		print(issue['href'])
