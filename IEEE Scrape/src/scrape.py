@@ -1,6 +1,9 @@
 from bs4 import BeautifulSoup
 import sys,urllib2
 import json
+import os
+
+# getting the parseable object for an url
 
 def get_soup(aurl):
 	hdr = {'User-Agent':'Mozilla/5.0'}
@@ -9,6 +12,7 @@ def get_soup(aurl):
 	asoup = BeautifulSoup(apage,'html.parser')
 	return asoup
 
+# Creates directories for all the volumes,all the issues of a volume
 
 def get_issues(aurl):
 	soup = get_soup(aurl)
@@ -34,7 +38,7 @@ def get_issues(aurl):
 
 with open('../data/Journal_data.json','r') as infile:
 	Jounrnals_data = json.load(infile)
-for record in Jounrnals_data['records'][0:1:]:
+for record in Jounrnals_data['records']:
 	if record['vj'] != True:
 		print(record['title'])
 		full_url = 'http://ieeexplore.ieee.org' + str(record['publicationLink'])
