@@ -236,7 +236,10 @@ def get_articles(aurl,adir):
 	soup = get_soup(aurl)
 	link1 = soup.find('input',{'id':'oqs'})
 	link0 = soup.find('input',{'id':'submitUrl'})
-	total_number = soup.find('div',{'class':'results-display'}).find_all('b')[1].get_text()
+    try:
+	   total_number = soup.find('div',{'class':'results-display'}).find_all('b')[1].get_text()
+    except IndexError:
+        total_number = "10"
 	newurl = 'http://ieeexplore.ieee.org' + link0['value'] + link1['value'] + '&rowsPerPage=' + total_number
 
 	fsoup = get_soup(newurl)
@@ -271,7 +274,7 @@ def get_issues(aurl,adir):
 		METRICS_dict['Eigenfactor'] = str(metrics[2].get_text())
 		METRICS_dict['Article Influence Score'] = str(metrics[4].get_text())
 
-	with open(adir+'metrics.json','w') as outfile:
+	with open(adir+'/metrics.json','w') as outfile:
 		json.dump(METRICS_dict,outfile)
 
 	try:
@@ -309,7 +312,7 @@ with open('../data/Journal_data.json','r') as infile:
 base_dir = '../output/Journal Data'
 ckdir(base_dir)
 
-for record in Journals_data['records']:
+for record in Journals_data['records'][::]:
 	if record['vj'] != True:
 		print(record['title'])
 		journal_dir = base_dir + '/'+record['title']
