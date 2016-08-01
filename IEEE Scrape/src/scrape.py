@@ -233,76 +233,90 @@ def get_article(arnumber):
 
 # Article numbers of each article in the issue link
 def get_articles(aurl,adir):
-	soup = get_soup(aurl)
-	link1 = soup.find('input',{'id':'oqs'})
-	link0 = soup.find('input',{'id':'submitUrl'})
+    soup = get_soup(aurl)
+    link1 = soup.find('input',{'id':'oqs'})
+    link0 = soup.find('input',{'id':'submitUrl'})
     try:
-	   total_number = soup.find('div',{'class':'results-display'}).find_all('b')[1].get_text()
+        total_number = soup.find('div',{'class':'results-display'}).find_all('b')[1].get_text()
     except IndexError:
         total_number = "10"
-	newurl = 'http://ieeexplore.ieee.org' + link0['value'] + link1['value'] + '&rowsPerPage=' + total_number
-
-	fsoup = get_soup(newurl)
-	articles = fsoup.find('ul',{'class':'results'}).find_all('li')
-	count = 0
-	for article in articles:
-		if article.find('h3').find('a') != None:
-			count += 1
-			article_dir = adir + '/Article ' + str(count)
-			ckdir(article_dir)
-			article_no = article.find('span').find('input')['id']
-			print(article_no)
-			article = get_article(article_no)
-			with open(article_dir+'/ArticleData.json','w') as outfile:
-				json.dump(article,outfile)
+    newurl = 'http://ieeexplore.ieee.org' + link0['value'] + link1['value'] + '&rowsPerPage=' + total_number
+    fsoup = get_soup(newurl)
+    articles = fsoup.find('ul',{'class':'results'}).find_all('li')
+    count = 0
+    for article in articles:
+        try:
+            if article.find('h3').find('a') != None:
+                count += 1
+                article_dir = adir + '/Article ' + str(count)
+                ckdir(article_dir)
+                article_no = article.find('span').find('input')['id']
+                print(article_no)
+                article = get_article(article_no)
+                with open(article_dir+'/ArticleData.json','w') as outfile:
+                    json.dump(article,outfile)
+        except AttributeError:
+            pass
 
 
 # Creates directories for all the volumes,all the issues of a volume
 def get_issues(aurl,adir):
-	soup = get_soup(aurl)
+    soup = get_soup(aurl)
+    volumes_dir = adir + '/Volumes'
+    ckdir(volumes_dir)
+    METRICS_dict = {}
+    metrics = soup.find('div',{'class':'jrnl-metrics cf'}).find_all('span')
+    if metrics == []:
+        METRICS_dict['Imfact Factor'] = '0'
+        METRICS_dict['Eigenfactor'] = '0'
+        METRICS_dict['Article Influence Score'] = '0'
+    else:
+        try:
+            METRICS_dict['Imfact Factor'] = str(metrics[0].get_text())
+        except IndexError:
+            METRICS_dict['Imfact Factor'] = '0'
+        try:
+            METRICS_dict['Eigenfactor'] = str(metrics[2].get_text())
+        except IndexError:
+            METRICS_dict['Eigenfactor'] = '0'
+        try:
+            METRICS_dict['Article Influence Score'] = str(metrics[4].get_text())
+        except IndexError:
+            METRICS_dict['Article Influence Score'] = '0'
 
-	volumes_dir = adir + '/Volumes'
-	ckdir(volumes_dir)
-	METRICS_dict = {}
-	metrics = soup.find('div',{'class':'jrnl-metrics cf'}).find_all('span')
-	if metrics == []:
-		METRICS_dict['Imfact Factor'] = '0'
-		METRICS_dict['Eigenfactor'] = '0'
-		METRICS_dict['Article Influence Score'] = '0'
-	else:
-		METRICS_dict['Imfact Factor'] = str(metrics[0].get_text())
-		METRICS_dict['Eigenfactor'] = str(metrics[2].get_text())
-		METRICS_dict['Article Influence Score'] = str(metrics[4].get_text())
+    with open(adir+'/metrics.json','w') as outfile:
+        json.dump(METRICS_dict,outfile)
 
-	with open(adir+'/metrics.json','w') as outfile:
-		json.dump(METRICS_dict,outfile)
+    try:
+        volumes = soup.find("div",{"class":'volumes'})
+        years = volumes.find_all('ul')
 
-	try:
-		volumes = soup.find("div",{"class":'volumes'})
-		years = volumes.find_all('ul')
+    except AttributeError:
+        volumes = soup.find("div",{'id':'past-issues'}).find('div',{'class':'oa_years'})
+        for volume in volumes.find_all('li'):
+            volume_dir = volumes_dir + '/' + str(volume.get_text())
+            ckdir(volume_dir)
+            issue_dir = volume_dir + '/Issue 1' 
+            ckdir(issue_dir)
+            issue_url = 'http://ieeexplore.ieee.org' + str(volume.find('a')['href'])
+            get_articles(issue_url,issue_dir)
+        return
 
-	except AttributeError:
-		volumes = soup.find("div",{'id':'past-issues'}).find('div',{'class':'oa_years'})
-		for volume in volumes.find_all('li'):
-			volume_dir = volumes_dir + '/' + str(volume.get_text())
-			ckdir(volume_dir)
-			issue_dir = volume_dir + '/Issue 1' 
-			ckdir(issue_dir)
-			issue_url = 'http://ieeexplore.ieee.org' + str(volume.find('a')['href'])
-			get_articles(issue_url,issue_dir)
-		return
-
-	for year in years:
-		issues = year.find_all('a')
-		volume_dir = volumes_dir + '/' + str(year['id'].split('-')[1])
-		ckdir(volume_dir)
-		for issue in issues:
-			issue_no = re.findall(r'Issue: [0-9]+',str(issue.get_text()))[0]
-			issue_no = re.sub('[^a-zA-Z0-9 ]','',issue_no)
-			issue_dir = volume_dir + '/' + issue_no
-			ckdir(issue_dir)
-			issue_url = 'http://ieeexplore.ieee.org' + str(issue['href'])
-			get_articles(issue_url,issue_dir)
+    for year in years[::]:
+        issues = year.find_all('a')
+        volume_dir = volumes_dir + '/' + str(year['id'].split('-')[1])
+        ckdir(volume_dir)
+        for issue in issues[::]:
+            try:
+                issue_no = re.findall(r'Issue: [0-9]+',str(issue.get_text()))[0]
+            except IndexError:
+                issue_no = re.findall(r'Issue: [A-Z][0-9]+',str(issue.get_text()))[0]
+            issue_no = re.sub('[^a-zA-Z0-9 ]','',issue_no)
+            issue_dir = volume_dir + '/' + issue_no
+            ckdir(issue_dir)
+            issue_url = 'http://ieeexplore.ieee.org' + str(issue['href'])
+            print('Issue Url : ' + issue_url)
+            get_articles(issue_url,issue_dir)
 
 
 # loading journal links from data file
