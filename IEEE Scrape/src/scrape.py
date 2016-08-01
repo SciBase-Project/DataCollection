@@ -3,6 +3,7 @@ import sys,urllib2
 import json
 import os
 import re
+import sys
 
 DETAILS_LINK = 'http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber='
 AUTHORS_LINK = 'http://ieeexplore.ieee.org/xpl/abstractAuthors.jsp?arnumber='
@@ -319,6 +320,17 @@ def get_issues(aurl,adir):
             get_articles(issue_url,issue_dir)
 
 
+if len(sys.argv) != 3:
+    print('Illegal number of arguments!! Exiting...')
+    sys.exit(1)
+
+x = int(sys.argv[1])
+y = int(sys.argv[2])
+
+if x>=y :
+    print('Invalid argument values..!! Exiting...')
+
+print('Accessing journals from '+ str(x)+' to ' + str(y))
 # loading journal links from data file
 with open('../data/Journal_data.json','r') as infile:
 	Journals_data = json.load(infile)
@@ -326,10 +338,10 @@ with open('../data/Journal_data.json','r') as infile:
 base_dir = '../output/Journal Data'
 ckdir(base_dir)
 
-for record in Journals_data['records'][::]:
+for record in Journals_data['records'][x:y:]:
 	if record['vj'] != True:
 		print(record['title'])
 		journal_dir = base_dir + '/'+record['title']
 		ckdir(journal_dir)
 		full_url = 'http://ieeexplore.ieee.org' + str(record['publicationLink'])
-		get_issues(full_url,journal_dir) 
+		# get_issues(full_url,journal_dir) 
