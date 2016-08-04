@@ -4,6 +4,7 @@ import json
 import os
 import re
 import sys
+import time
 
 DETAILS_LINK = 'http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber='
 AUTHORS_LINK = 'http://ieeexplore.ieee.org/xpl/abstractAuthors.jsp?arnumber='
@@ -245,14 +246,19 @@ def get_articles(aurl,adir):
     fsoup = get_soup(newurl)
     articles = fsoup.find('ul',{'class':'results'}).find_all('li')
     count = 0
+    count_article = 0
     for article in articles:
+        print('Accessing article index '+str(count_article))
+        count_article += 1
         try:
             if article.find('h3').find('a') != None:
                 count += 1
                 article_dir = adir + '/Article ' + str(count)
                 ckdir(article_dir)
                 article_no = article.find('span').find('input')['id']
-                print(article_no)
+                localtime = time.asctime(time.localtime(time.time()))
+                print('Access time is : '+str(localtime))
+                # print(article_no)
                 article = get_article(article_no)
                 with open(article_dir+'/ArticleData.json','w') as outfile:
                     json.dump(article,outfile)
@@ -262,6 +268,7 @@ def get_articles(aurl,adir):
 
 # Creates directories for all the volumes,all the issues of a volume
 def get_issues(aurl,adir):
+    global i
     soup = get_soup(aurl)
     volumes_dir = adir + '/Volumes'
     ckdir(volumes_dir)
@@ -294,7 +301,7 @@ def get_issues(aurl,adir):
 
     except AttributeError:
         volumes = soup.find("div",{'id':'past-issues'}).find('div',{'class':'oa_years'})
-        for volume in volumes.find_all('li'):
+        for volume in volumes.find_all('li')[i::]:
             volume_dir = volumes_dir + '/' + str(volume.get_text())
             ckdir(volume_dir)
             issue_dir = volume_dir + '/Issue 1' 
@@ -303,32 +310,49 @@ def get_issues(aurl,adir):
             get_articles(issue_url,issue_dir)
         return
 
-    for year in years[::]:
+    count_volume = i
+    for year in years[i::]:
+        print('Accessing Volume '+str(count_volume))
+        count_volume += 1
         issues = year.find_all('a')
         volume_dir = volumes_dir + '/' + str(year['id'].split('-')[1])
         ckdir(volume_dir)
+        print('Volume dir : '+str(volume_dir))
+        count_issue = 0
         for issue in issues[::]:
+            print("Accessing issue "+str(count_issue))
+            count_issue += 1
             try:
                 issue_no = re.findall(r'Issue: [0-9]+',str(issue.get_text()))[0]
             except IndexError:
                 issue_no = re.findall(r'Issue: [A-Z][0-9]+',str(issue.get_text()))[0]
+            print("Issue Name : "+str(issue_no))
             issue_no = re.sub('[^a-zA-Z0-9 ]','',issue_no)
             issue_dir = volume_dir + '/' + issue_no
             ckdir(issue_dir)
             issue_url = 'http://ieeexplore.ieee.org' + str(issue['href'])
-            print('Issue Url : ' + issue_url)
+            # print('Issue Url : ' + issue_url)
             get_articles(issue_url,issue_dir)
 
 
-if len(sys.argv) != 3:
+if len(sys.argv) != 3 and len(sys.argv) != 4:
     print('Illegal number of arguments!! Exiting...')
     sys.exit(1)
 
 x = int(sys.argv[1])
 y = int(sys.argv[2])
 
+i = 0
+
+if len(sys.argv) == 4:
+    i = int(sys.argv[3])
+    if i < 0 :
+        print('Invalid volume number...!! Exiting...')
+        sys.exit()
+
 if x>=y :
-    print('Invalid argument values..!! Exiting...')
+    print('Invalid journal indices..!! Exiting...')
+    sys.exit()
 
 print('Accessing journals from '+ str(x)+' to ' + str(y))
 # loading journal links from data file
@@ -338,10 +362,14 @@ with open('../data/Journal_data.json','r') as infile:
 base_dir = '../output/Journal Data'
 ckdir(base_dir)
 
+count_journal = x - 1
 for record in Journals_data['records'][x:y:]:
-	if record['vj'] != True:
-		print(record['title'])
-		journal_dir = base_dir + '/'+record['title']
-		ckdir(journal_dir)
-		full_url = 'http://ieeexplore.ieee.org' + str(record['publicationLink'])
-		get_issues(full_url,journal_dir) 
+    count_journal += 1
+    if record['vj'] != True:
+        print('Accessing journal '+str(count_journal))
+        print(record['title'])
+        journal_dir = base_dir + '/'+record['title']
+        ckdir(journal_dir)
+        full_url = 'http://ieeexplore.ieee.org' + str(record['publicationLink'])
+        get_issues(full_url,journal_dir)
+        i = 0
