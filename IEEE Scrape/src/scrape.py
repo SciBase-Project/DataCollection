@@ -46,173 +46,169 @@ def get_details(id):
 
     abstract = ""
 
-    # page = urllib2.urlopen(link).read()
-    # soup = BeautifulSoup(page, 'html.parser')
+    try:
+        soup = get_soup(link)
+        
+        # abstract
+        divs = soup.find_all("div", attrs={"class": "article"})
+        for div in divs:
+            if div.find("p") != None:
+                abstract = div.find("p").string
+                break
 
-    soup = get_soup(link)
-    print(link)
-    
-    # abstract
-    divs = soup.find_all("div", attrs={"class": "article"})
-    for div in divs:
-        if div.find("p") != None:
-            abstract = div.find("p").string
-            break
+        details["abstract"] = abstract
 
-    details["abstract"] = abstract
-
-    conference = soup.find("meta", attrs={"name": "citation_conference"})
-    publisher = soup.find("meta", attrs={"name": "citation_publisher"})
-    title = soup.find("meta", attrs={"name": "citation_title"})
-    date = soup.find("meta", attrs={"name": "citation_date"})
-    volume = soup.find("meta", attrs={"name": "citation_volume"})
-    issue = soup.find("meta", attrs={"name": "citation_issue"})
-    firstpage = soup.find("meta", attrs={"name": "citation_firstpage"})
-    lastpage = soup.find("meta", attrs={"name": "citation_lastpage"})
-    doi = soup.find("meta", attrs={"name": "citation_doi"})
-    isbn = soup.find("meta", attrs={"name": "citation_isbn"})
-    journal_title = soup.find("meta", attrs={"name": "citation_journal_title"})
+        conference = soup.find("meta", attrs={"name": "citation_conference"})
+        publisher = soup.find("meta", attrs={"name": "citation_publisher"})
+        title = soup.find("meta", attrs={"name": "citation_title"})
+        date = soup.find("meta", attrs={"name": "citation_date"})
+        volume = soup.find("meta", attrs={"name": "citation_volume"})
+        issue = soup.find("meta", attrs={"name": "citation_issue"})
+        firstpage = soup.find("meta", attrs={"name": "citation_firstpage"})
+        lastpage = soup.find("meta", attrs={"name": "citation_lastpage"})
+        doi = soup.find("meta", attrs={"name": "citation_doi"})
+        isbn = soup.find("meta", attrs={"name": "citation_isbn"})
+        journal_title = soup.find("meta", attrs={"name": "citation_journal_title"})
 
 
-    pages = soup.find("dt", text="Page(s):")
-    meeting_date = soup.find("dt", text="Meeting Date :")
-    inspec = soup.find("dt", text="INSPEC Accession Number:")
-    conference_location = soup.find("dt", text="Conference Location :")
-    issn = soup.find("dt", text="ISSN :")
-    date_publication = soup.find("dt", text="Date of Publication :")
-    date_current_version = soup.find("dt", text="Date of Current Version :")
-    issue_date = soup.find("dt", text="Issue Date :")
-    sponsor = soup.find("dt", text="Sponsored by :")
+        pages = soup.find("dt", text="Page(s):")
+        meeting_date = soup.find("dt", text="Meeting Date :")
+        inspec = soup.find("dt", text="INSPEC Accession Number:")
+        conference_location = soup.find("dt", text="Conference Location :")
+        issn = soup.find("dt", text="ISSN :")
+        date_publication = soup.find("dt", text="Date of Publication :")
+        date_current_version = soup.find("dt", text="Date of Current Version :")
+        issue_date = soup.find("dt", text="Issue Date :")
+        sponsor = soup.find("dt", text="Sponsored by :")
 
 
-    if conference : details["conference"] = conference["content"]
-    if publisher : details["publisher"] = publisher["content"]
-    if title : details["title"] = title["content"]
-    if date : details["date"] = date["content"]
-    if volume : details["volume"] = volume["content"]
-    if issue : details["issue"] = issue["content"]
-    if firstpage : details["firstpage"] = firstpage["content"]
-    if lastpage : details["lastpage"] = lastpage["content"]
-    if doi : details["doi"] = doi["content"]
-    if isbn : details["isbn"] = isbn["content"]
-    if journal_title : details["journal_title"] = journal_title["content"]
+        if conference : details["conference"] = conference["content"]
+        if publisher : details["publisher"] = publisher["content"]
+        if title : details["title"] = title["content"]
+        if date : details["date"] = date["content"]
+        if volume : details["volume"] = volume["content"]
+        if issue : details["issue"] = issue["content"]
+        if firstpage : details["firstpage"] = firstpage["content"]
+        if lastpage : details["lastpage"] = lastpage["content"]
+        if doi : details["doi"] = doi["content"]
+        if isbn : details["isbn"] = isbn["content"]
+        if journal_title : details["journal_title"] = journal_title["content"]
 
-    try :
-        if pages : details["pages"] = " ".join(pages.findNext("dd").contents[0].strip().split())
-    except : pass
-    try :
-        if meeting_date : details["meeting_date"] = " ".join(meeting_date.findNext("dd").contents[0].strip().split())
-    except : pass
-    try :
-        if inspec : details["inspec"] = " ".join(inspec.findNext("dd").contents[0].strip().split())
-    except : pass
-    try :
-        if conference_location : details["conference_location"] = " ".join(conference_location.findNext("dd").contents[0].strip().split())
-    except : pass
-    try :
-        if issn : details["issn"] = " ".join(issn.findNext("dd").contents[0].strip().split())
-    except : pass
-    try :
-        if date_publication : details["date_publication"] = " ".join(date_publication.findNext("dd").contents[0].strip().split())
-    except : pass
-    try :
-        if date_current_version : details["date_current_version"] = " ".join(date_current_version.findNext("dd").contents[0].strip().split())
-    except : pass
-    try :
-        if issue_date : details["issue_date"] = " ".join(issue_date.findNext("dd").contents[0].strip().split())
-    except : pass
-    try :
-        if sponsor : details["sponsor"] = sponsor.findNext("dd").find("a").text
-    except : pass
+        try :
+            if pages : details["pages"] = " ".join(pages.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if meeting_date : details["meeting_date"] = " ".join(meeting_date.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if inspec : details["inspec"] = " ".join(inspec.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if conference_location : details["conference_location"] = " ".join(conference_location.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if issn : details["issn"] = " ".join(issn.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if date_publication : details["date_publication"] = " ".join(date_publication.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if date_current_version : details["date_current_version"] = " ".join(date_current_version.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if issue_date : details["issue_date"] = " ".join(issue_date.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if sponsor : details["sponsor"] = sponsor.findNext("dd").find("a").text
+        except : pass
+
+
+    except Exception,e: print str(e)
 
 
     return details
 
-    # try:
-    #     # page = urllib2.urlopen(link).read()
-    #     # soup = BeautifulSoup(page, 'html.parser')
+    try:
+        soup = get_soup(link)
 
-    #     soup = get_soup(link)
-    #     print(link)
+        # abstract
+        divs = soup.find_all("div", attrs={"class": "article"})
+        for div in divs:
+            if div.find("p") != None:
+                abstract = div.find("p").string
+                break
 
-    #     # abstract
-    #     divs = soup.find_all("div", attrs={"class": "article"})
-    #     for div in divs:
-    #         if div.find("p") != None:
-    #             abstract = div.find("p").string
-    #             break
+        details["abstract"] = abstract
 
-    #     details["abstract"] = abstract
-
-    #     conference = soup.find("meta", attrs={"name": "citation_conference"})
-    #     publisher = soup.find("meta", attrs={"name": "citation_publisher"})
-    #     title = soup.find("meta", attrs={"name": "citation_title"})
-    #     date = soup.find("meta", attrs={"name": "citation_date"})
-    #     volume = soup.find("meta", attrs={"name": "citation_volume"})
-    #     issue = soup.find("meta", attrs={"name": "citation_issue"})
-    #     firstpage = soup.find("meta", attrs={"name": "citation_firstpage"})
-    #     lastpage = soup.find("meta", attrs={"name": "citation_lastpage"})
-    #     doi = soup.find("meta", attrs={"name": "citation_doi"})
-    #     isbn = soup.find("meta", attrs={"name": "citation_isbn"})
-    #     journal_title = soup.find("meta", attrs={"name": "citation_journal_title"})
+        conference = soup.find("meta", attrs={"name": "citation_conference"})
+        publisher = soup.find("meta", attrs={"name": "citation_publisher"})
+        title = soup.find("meta", attrs={"name": "citation_title"})
+        date = soup.find("meta", attrs={"name": "citation_date"})
+        volume = soup.find("meta", attrs={"name": "citation_volume"})
+        issue = soup.find("meta", attrs={"name": "citation_issue"})
+        firstpage = soup.find("meta", attrs={"name": "citation_firstpage"})
+        lastpage = soup.find("meta", attrs={"name": "citation_lastpage"})
+        doi = soup.find("meta", attrs={"name": "citation_doi"})
+        isbn = soup.find("meta", attrs={"name": "citation_isbn"})
+        journal_title = soup.find("meta", attrs={"name": "citation_journal_title"})
 
 
-    #     pages = soup.find("dt", text="Page(s):")
-    #     meeting_date = soup.find("dt", text="Meeting Date :")
-    #     inspec = soup.find("dt", text="INSPEC Accession Number:")
-    #     conference_location = soup.find("dt", text="Conference Location :")
-    #     issn = soup.find("dt", text="ISSN :")
-    #     date_publication = soup.find("dt", text="Date of Publication :")
-    #     date_current_version = soup.find("dt", text="Date of Current Version :")
-    #     issue_date = soup.find("dt", text="Issue Date :")
-    #     sponsor = soup.find("dt", text="Sponsored by :")
+        pages = soup.find("dt", text="Page(s):")
+        meeting_date = soup.find("dt", text="Meeting Date :")
+        inspec = soup.find("dt", text="INSPEC Accession Number:")
+        conference_location = soup.find("dt", text="Conference Location :")
+        issn = soup.find("dt", text="ISSN :")
+        date_publication = soup.find("dt", text="Date of Publication :")
+        date_current_version = soup.find("dt", text="Date of Current Version :")
+        issue_date = soup.find("dt", text="Issue Date :")
+        sponsor = soup.find("dt", text="Sponsored by :")
 
 
-    #     if conference : details["conference"] = conference["content"]
-    #     if publisher : details["publisher"] = publisher["content"]
-    #     if title : details["title"] = title["content"]
-    #     if date : details["date"] = date["content"]
-    #     if volume : details["volume"] = volume["content"]
-    #     if issue : details["issue"] = issue["content"]
-    #     if firstpage : details["firstpage"] = firstpage["content"]
-    #     if lastpage : details["lastpage"] = lastpage["content"]
-    #     if doi : details["doi"] = doi["content"]
-    #     if isbn : details["isbn"] = isbn["content"]
-    #     if journal_title : details["journal_title"] = journal_title["content"]
+        if conference : details["conference"] = conference["content"]
+        if publisher : details["publisher"] = publisher["content"]
+        if title : details["title"] = title["content"]
+        if date : details["date"] = date["content"]
+        if volume : details["volume"] = volume["content"]
+        if issue : details["issue"] = issue["content"]
+        if firstpage : details["firstpage"] = firstpage["content"]
+        if lastpage : details["lastpage"] = lastpage["content"]
+        if doi : details["doi"] = doi["content"]
+        if isbn : details["isbn"] = isbn["content"]
+        if journal_title : details["journal_title"] = journal_title["content"]
 
-    #     try :
-    #         if pages : details["pages"] = " ".join(pages.findNext("dd").contents[0].strip().split())
-    #     except : pass
-    #     try :
-    #         if meeting_date : details["meeting_date"] = " ".join(meeting_date.findNext("dd").contents[0].strip().split())
-    #     except : pass
-    #     try :
-    #         if inspec : details["inspec"] = " ".join(inspec.findNext("dd").contents[0].strip().split())
-    #     except : pass
-    #     try :
-    #         if conference_location : details["conference_location"] = " ".join(conference_location.findNext("dd").contents[0].strip().split())
-    #     except : pass
-    #     try :
-    #         if issn : details["issn"] = " ".join(issn.findNext("dd").contents[0].strip().split())
-    #     except : pass
-    #     try :
-    #         if date_publication : details["date_publication"] = " ".join(date_publication.findNext("dd").contents[0].strip().split())
-    #     except : pass
-    #     try :
-    #         if date_current_version : details["date_current_version"] = " ".join(date_current_version.findNext("dd").contents[0].strip().split())
-    #     except : pass
-    #     try :
-    #         if issue_date : details["issue_date"] = " ".join(issue_date.findNext("dd").contents[0].strip().split())
-    #     except : pass
-    #     try :
-    #         if sponsor : details["sponsor"] = sponsor.findNext("dd").find("a").text
-    #     except : pass
-
-
-    # except Exception,e: print str(e)
+        try :
+            if pages : details["pages"] = " ".join(pages.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if meeting_date : details["meeting_date"] = " ".join(meeting_date.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if inspec : details["inspec"] = " ".join(inspec.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if conference_location : details["conference_location"] = " ".join(conference_location.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if issn : details["issn"] = " ".join(issn.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if date_publication : details["date_publication"] = " ".join(date_publication.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if date_current_version : details["date_current_version"] = " ".join(date_current_version.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if issue_date : details["issue_date"] = " ".join(issue_date.findNext("dd").contents[0].strip().split())
+        except : pass
+        try :
+            if sponsor : details["sponsor"] = sponsor.findNext("dd").find("a").text
+        except : pass
 
 
-    # return details
+    except Exception,e: print str(e)
+
+
+    return details
 
 
 def get_authors(id):
@@ -418,79 +414,41 @@ def get_issues(aurl,adir):
             get_articles(issue_url,issue_dir)
 
 
-"""
-Uncomment this for normal functionality
+if len(sys.argv) != 3 and len(sys.argv) != 4:
+    print('Illegal number of arguments!! Exiting...')
+    sys.exit(1)
 
-# if len(sys.argv) != 3 and len(sys.argv) != 4:
-#     print('Illegal number of arguments!! Exiting...')
-#     sys.exit(1)
+x = int(sys.argv[1])
+y = int(sys.argv[2])
 
-# x = int(sys.argv[1])
-# y = int(sys.argv[2])
+i = 0
 
-# i = 0
+if len(sys.argv) == 4:
+    i = int(sys.argv[3])
+    if i < 0 :
+        print('Invalid volume number...!! Exiting...')
+        sys.exit()
 
-# if len(sys.argv) == 4:
-#     i = int(sys.argv[3])
-#     if i < 0 :
-#         print('Invalid volume number...!! Exiting...')
-#         sys.exit()
+if x>=y :
+    print('Invalid journal indices..!! Exiting...')
+    sys.exit()
 
-# if x>=y :
-#     print('Invalid journal indices..!! Exiting...')
-#     sys.exit()
+print('Accessing journals from '+ str(x)+' to ' + str(y))
+# loading journal links from data file
+with open('../data/Journal_data.json','r') as infile:
+	Journals_data = json.load(infile)
 
-# print('Accessing journals from '+ str(x)+' to ' + str(y))
-# # loading journal links from data file
-# with open('../data/Journal_data.json','r') as infile:
-# 	Journals_data = json.load(infile)
+base_dir = '../output/Journal Data'
+ckdir(base_dir)
 
-# base_dir = '../output/Journal Data'
-# ckdir(base_dir)
-
-# count_journal = x - 1
-# for record in Journals_data['records'][x:y:]:
-#     count_journal += 1
-#     if record['vj'] != True:
-#         print('Accessing journal '+str(count_journal))
-#         print(record['title'])
-#         journal_dir = base_dir + '/'+record['title']
-#         ckdir(journal_dir)
-#         full_url = 'http://ieeexplore.ieee.org ' + str(record['publicationLink'])
-#         get_issues(full_url,journal_dir)
-#         i = 0
-
-End of original script
-"""
-
-journal_dir = '../output/Journal Data/IEEE Journal of Translational Engineering in Health and Medicine'
-article_dir = journal_dir + '/Volumes/2013/Issue 1/Article 7'
-with open(article_dir+'/ArticleData.json','r') as infile:
-    article_data = json.load(infile)
-
-article_data['references_articles'] = []
-count = 0
-print('Total references : '+str(len(article_data['references'])))
-for reference in article_data['references']:
-    count += 1
-    print('Getting reference : '+str(count))
-    print('Reference number : '+reference)
-    referred_article = get_article(reference)
-    print(referred_article)
-    referred_article['references_articles'] = []
-
-    print('Referred article references : '+str(len(referred_article['references'])))
-    second_count = 0
-
-    for new_reference in referred_article['references']:
-        second_count += 1
-        print('Accessing next hop reference : '+str(second_count))
-        print('Reference number : '+reference)
-        next_reference = get_article(new_reference)
-
-        referred_article['references_articles'].append(next_reference)
-
-    article_data['references_articles'].append(referred_article)
-
-with open('../output/article7.json','w') as outfile:
-    json.dump(article_data,outfile)
+count_journal = x - 1
+for record in Journals_data['records'][x:y:]:
+    count_journal += 1
+    if record['vj'] != True:
+        print('Accessing journal '+str(count_journal))
+        print(record['title'])
+        journal_dir = base_dir + '/'+record['title']
+        ckdir(journal_dir)
+        full_url = 'http://ieeexplore.ieee.org ' + str(record['publicationLink'])
+        get_issues(full_url,journal_dir)
+        i = 0
