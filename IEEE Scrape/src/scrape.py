@@ -449,6 +449,6 @@ for record in Journals_data['records'][x:y:]:
         print(record['title'])
         journal_dir = base_dir + '/'+record['title']
         ckdir(journal_dir)
-        full_url = 'http://ieeexplore.ieee.org ' + str(record['publicationLink'])
+        full_url = 'http://ieeexplore.ieee.org' + str(record['publicationLink'])
         get_issues(full_url,journal_dir)
         i = 0
