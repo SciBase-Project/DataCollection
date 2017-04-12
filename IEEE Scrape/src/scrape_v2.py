@@ -77,6 +77,21 @@ def get_details(arnumber):
 	return details
 
 
+# Getting the authors' details
+def get_authors(arnumber):
+	details 	= {}
+
+	try:
+		authors_link		= JSON_Data_link + arnumber + "/authors"
+		response 			= get_response(authors_link)
+		content				= response.read().decode()
+		details 	= json.loads(content)
+	except Exception:
+		pass
+
+	return details
+
+
 # Getting the references JSON structure provided under the References tab of an article
 def get_references(arnumber):
 	references 	= {}
@@ -111,6 +126,7 @@ def get_article(arnumber):
 
 	article["arnumber"] 		= arnumber
 	article["details"] 			= get_details(arnumber)
+	article["authors"]			= get_authors(arnumber)
 	reference_data				= get_references(arnumber)
 	try:
 		article["references"]	= reference_data['references']
@@ -131,7 +147,10 @@ def get_articles(aurl,adir):
         total_number 			= "10"
     newurl 						= 'http://ieeexplore.ieee.org' + link0['value'] + link1['value'] + '&rowsPerPage=' + total_number
     fsoup 						= get_soup(newurl)
-    articles 					= fsoup.find('ul',{'class':'results'}).find_all('li')
+    try:
+    	articles 					= fsoup.find('ul',{'class':'results'}).find_all('li')
+    except AttributeError:
+    	continue
     count 						= 0
     count_article 				= 0
     for article in articles:
@@ -262,7 +281,7 @@ if __name__ 	== "__main__":
 	with open('../data/Journal_data.json','r') as infile:
 		Journals_data 	= json.load(infile)
 
-	base_dir 	= '../output/Journal Data1'
+	base_dir 	= '../output/Journal Data'
 	ckdir(base_dir)
 
 	count_journal 	= x - 1
